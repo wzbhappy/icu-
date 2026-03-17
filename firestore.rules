@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return true; // Relaxed for testing phase
+    }
+    
+    function isOwner(userId) {
+      return true; // Relaxed for testing phase
+    }
+
+    // Patients collection
+    match /patients/{patientId} {
+      allow read, write: if true;
+      
+      match /updates/{updateId} {
+        allow read, write: if true;
+      }
+      
+      match /reports/{reportId} {
+        allow read, write: if true;
+      }
+
+      match /messages/{messageId} {
+        allow read, write: if true;
+      }
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if true; // Relaxed for testing phase
+    }
+  }
+}

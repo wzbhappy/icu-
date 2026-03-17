@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Stores user role and phone number",
+      "type": "object",
+      "properties": {
+        "phoneNumber": { "type": "string" },
+        "role": { "type": "string", "enum": ["nurse", "family"] },
+        "name": { "type": "string" }
+      },
+      "required": ["phoneNumber", "role"]
+    },
+    "Patient": {
+      "title": "Patient",
+      "description": "Represents a patient in the Heart ICU",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Patient name" },
+        "bedNumber": { "type": "string", "description": "Bed number" },
+        "type": { "type": "string", "enum": ["transplant", "lvad"], "description": "Patient category" },
+        "status": { "type": "string", "enum": ["green", "yellow", "red"], "description": "Overall status indicator" },
+        "lastUpdate": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["name", "bedNumber", "type", "status"]
+    },
+    "NurseUpdate": {
+      "title": "Nurse Update",
+      "description": "Discrete tags and status recorded by the nurse",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string", "description": "Reference to Patient ID" },
+        "nurseId": { "type": "string", "description": "Reference to Nurse ID" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "tags": {
+          "type": "object",
+          "properties": {
+            "vitalSigns": { "type": "string", "enum": ["stable", "monitoring", "critical"] },
+            "temperature": { "type": "string", "enum": ["low", "normal", "fever_low", "fever_high"] },
+            "bloodPressure": { "type": "string", "enum": ["normal", "low", "high"] },
+            "heartRate": { "type": "string", "enum": ["normal", "slow", "fast"] },
+            "oxygen": { "type": "string", "enum": ["normal", "low"] },
+            "lvadStatus": { "type": "string", "enum": ["normal", "alarm", "off"] },
+            "intubation": { 
+              "type": "object", 
+              "properties": {
+                "status": { "type": "string", "enum": ["normal", "extubated", "new"] },
+                "detail": { "type": "string" }
+              }
+            },
+            "drainage": { 
+              "type": "object", 
+              "properties": {
+                "status": { "type": "string", "enum": ["normal", "extubated", "new"] },
+                "detail": { "type": "string" }
+              }
+            },
+            "urinaryCatheter": { 
+              "type": "object", 
+              "properties": {
+                "status": { "type": "string", "enum": ["normal", "extubated", "new"] },
+                "detail": { "type": "string" }
+              }
+            },
+            "diet": { "type": "string", "enum": ["npo", "liquid", "soft", "normal"] },
+            "activity": { "type": "string", "enum": ["bed", "sit", "stand", "walk"] },
+            "sleep": { "type": "string", "enum": ["good", "fair", "poor"] },
+            "mainProblem": { "type": "string", "description": "目前主要问题" },
+            "transplantSpecific": {
+              "type": "object",
+              "properties": {
+                "rejectionSigns": { "type": "string", "enum": ["none", "mild", "moderate", "severe"] },
+                "immunosuppressant": { "type": "string", "enum": ["target", "low", "high"] }
+              }
+            },
+            "lvadSpecific": {
+              "type": "object",
+              "properties": {
+                "pumpSpeed": { "type": "number", "description": "泵速" },
+                "pumpFlow": { "type": "number", "description": "流量" },
+                "pumpPower": { "type": "number", "description": "功率" },
+                "drivelineSite": { "type": "string", "description": "泵缆出口处情况" }
+              }
+            }
+          }
+        },
+        "needs": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["patientId", "timestamp", "tags"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Message from family to patient/nurse",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "senderRole": { "type": "string" },
+        "type": { "type": "string", "enum": ["text", "voice"] },
+        "content": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "DailyReport": {
+      "title": "Daily Report",
+      "description": "AI-translated report for the family",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "content": { "type": "string", "description": "Translated warm text" },
+        "status": { "type": "string", "enum": ["green", "yellow", "red"] }
+      },
+      "required": ["patientId", "timestamp", "content"]
+    }
+  },
+  "firestore": {
+    "/users": { "schema": "User", "description": "User profiles" },
+    "/patients": { "schema": "Patient", "description": "Collection of patients" },
+    "/patients/{patientId}/updates": { "schema": "NurseUpdate", "description": "Updates for a specific patient" },
+    "/patients/{patientId}/reports": { "schema": "DailyReport", "description": "AI reports for a specific patient" },
+    "/patients/{patientId}/messages": { "schema": "Message", "description": "Messages between family and nurse" }
+  }
+}

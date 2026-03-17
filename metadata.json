@@ -1,0 +1,8 @@
+{
+  "name": "心外ICU家属桥 (Heart ICU Bridge)",
+  "description": "心外ICU极简录入与AI智能病情翻译工具，连接护士与家属，缓解焦虑，提升效率。",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
