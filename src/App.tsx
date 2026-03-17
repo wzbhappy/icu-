@@ -15,6 +15,7 @@ import {
   Stethoscope,
   ChevronRight,
   Plus,
+  BookOpen,
   LogOut,
   Send,
   Loader2,
@@ -1114,13 +1115,88 @@ function NurseView({ patients, selectedPatient, setSelectedPatient, view, setVie
   );
 }
 
+// --- Health Education Component ---
+
+function HealthEducation({ type }: { type: 'transplant' | 'lvad' }) {
+  const commonKnowledge = [
+    {
+      title: "什么是ICU术后康复？",
+      content: "心脏大手术后，患者需要在ICU进行密切监护。康复是一个循序渐进的过程，包括呼吸功能恢复、早期下床活动和营养支持。"
+    },
+    {
+      title: "家属可以做些什么？",
+      content: "保持积极乐观的心态，通过留言板给予患者鼓励。准备好必要的洗漱用品和换洗衣物。遵循医护人员的指导进行探视。"
+    }
+  ];
+
+  const specificKnowledge = type === 'lvad' ? [
+    {
+      title: "LVAD (左心室辅助装置) 简介",
+      content: "LVAD是一种植入式机械泵，帮助虚弱的左心室将血液泵向全身。它由体内泵、穿过皮肤的泵缆（Driveline）和体外控制器组成。"
+    },
+    {
+      title: "泵缆 (Driveline) 护理",
+      content: "泵缆出口处的皮肤护理至关重要，必须保持干燥、清洁，防止感染。护士会定期更换敷料。"
+    },
+    {
+      title: "电池与电源管理",
+      content: "LVAD依靠电池或交流电源运行。家属需了解电池的更换和充电流程，确保设备始终有电。"
+    }
+  ] : [
+    {
+      title: "心脏移植术后须知",
+      content: "心脏移植后，患者需要终身服用免疫抑制剂，以防止身体排斥新心脏。早期识别排异反应和预防感染是关键。"
+    },
+    {
+      title: "免疫抑制剂的重要性",
+      content: "必须严格按照医嘱、准时服用药物。药物浓度过低可能导致排异，过高则可能增加感染风险。"
+    },
+    {
+      title: "预防感染",
+      content: "移植术后免疫力较低，需注意个人卫生，避免前往人群拥挤处，探视时请务必佩戴口罩并洗手。"
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-start gap-3">
+        <BookOpen className="w-5 h-5 text-amber-600 mt-0.5" />
+        <div>
+          <h4 className="text-sm font-bold text-amber-900">健康宣教手册</h4>
+          <p className="text-xs text-amber-700 mt-1">了解更多关于疾病和术后康复的知识，帮助患者更好恢复。</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">专项知识</h3>
+        {specificKnowledge.map((item, i) => (
+          <Card key={i} className="p-5">
+            <h4 className="font-bold text-slate-900 mb-2">{item.title}</h4>
+            <p className="text-sm text-slate-600 leading-relaxed">{item.content}</p>
+          </Card>
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">通用常识</h3>
+        {commonKnowledge.map((item, i) => (
+          <Card key={i} className="p-5">
+            <h4 className="font-bold text-slate-900 mb-2">{item.title}</h4>
+            <p className="text-sm text-slate-600 leading-relaxed">{item.content}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // --- Family View ---
 
 function FamilyView({ patients, selectedPatient, setSelectedPatient, view, setView }: any) {
   const [reports, setReports] = useState<DailyReport[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'report' | 'chat'>('report');
+  const [activeTab, setActiveTab] = useState<'report' | 'chat' | 'edu'>('report');
   const [newMessage, setNewMessage] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   
@@ -1268,6 +1344,12 @@ function FamilyView({ patients, selectedPatient, setSelectedPatient, view, setVi
             >
               留言互动
             </button>
+            <button 
+              onClick={() => setActiveTab('edu')}
+              className={cn("px-4 py-2 rounded-lg text-sm font-medium transition-all", activeTab === 'edu' ? "bg-white shadow-sm text-amber-600" : "text-slate-500")}
+            >
+              健康宣教
+            </button>
           </div>
         </div>
 
@@ -1301,7 +1383,7 @@ function FamilyView({ patients, selectedPatient, setSelectedPatient, view, setVi
               <p className="text-slate-500">暂无日报，护士正在努力录入中...</p>
             </div>
           )
-        ) : (
+        ) : activeTab === 'chat' ? (
           <div className="flex flex-col h-[600px] bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-2">
@@ -1375,6 +1457,8 @@ function FamilyView({ patients, selectedPatient, setSelectedPatient, view, setVi
               {isRecording && <p className="text-center text-[10px] text-rose-500 mt-2 animate-pulse">松开结束录音并发送</p>}
             </div>
           </div>
+        ) : (
+          <HealthEducation type={selectedPatient.type} />
         )}
       </motion.div>
     );
